@@ -87,6 +87,16 @@ public:
          const ConstraintSatisfaction *Satisfaction, bool Dependent,
          bool ContainsUnexpandedParameterPack);
 
+  static ConceptSpecializationExpr *
+  Create(const ASTContext &C, ConceptDecl *NamedConcept,
+         ImplicitConceptSpecializationDecl *SpecDecl,
+         const ConstraintSatisfaction *Satisfaction, bool Dependent,
+         bool ContainsUnexpandedParameterPack) {
+    Create(C, NamedConcept, /*ArgsAsWritten*/ nullptr, SpecDecl, Satisfaction,
+           Dependent, ContainsUnexpandedParameterPack);
+  }
+
+
   ArrayRef<TemplateArgument> getTemplateArguments() const {
     return SpecDecl->getTemplateArguments();
   }
