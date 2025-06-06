@@ -319,6 +319,21 @@ class OpenACCClauseCIREmitter final
     dataOperands.push_back(afterOp.getOperation());
   }
 
+  template <typename BeforeOpTy>
+  void addDataOperand(const Expr *varOperand, mlir::acc::DataClause dataClause,
+                      bool structured, bool implicit) {
+    DataOperandInfo opInfo = getDataOperandInfo(dirKind, varOperand);
+    auto beforeOp =
+        builder.create<BeforeOpTy>(opInfo.beginLoc, opInfo.varValue, structured,
+                                   implicit, opInfo.name, opInfo.bounds);
+    operation.getDataClauseOperandsMutable().append(beforeOp.getResult());
+
+    // Set the 'rest' of the info for the operation.
+    beforeOp.setDataClause(dataClause);
+    // Make sure we record these, so 'async' values can be updated later.
+    dataOperands.push_back(beforeOp.getOperation());
+  }
+
   // Helper function that covers for the fact that we don't have this function
   // on all operation types.
   mlir::ArrayAttr getAsyncOnlyAttr() {
@@ -788,6 +803,22 @@ public:
     } else {
       // TODO: When we've implemented this for everything, switch this to an
       // unreachable. data, declare, combined constructs remain.
+      return clauseNotImplemented(clause);
+    }
+  }
+
+  void VisitDevicePtrClause(const OpenACCDevicePtrClause &clause) {
+    if constexpr (isOneOfTypes<OpTy, mlir::acc::ParallelOp, mlir::acc::SerialOp,
+                               mlir::acc::KernelsOp>) {
+      for (auto var : clause.getVarList())
+        addDataOperand<mlir::acc::DevicePtrOp>(
+            var, mlir::acc::DataClause::acc_deviceptr, /*structured=*/true,
+            /*implicit=*/false);
+    } else if constexpr (isCombinedType<OpTy>) {
+      applyToComputeOp(clause);
+    } else {
+      // TODO: When we've implemented this for everything, switch this to an
+      // unreachable. data, declare remain.
       return clauseNotImplemented(clause);
     }
   }
