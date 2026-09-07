@@ -280,6 +280,7 @@ set_target_properties(check-mlir-build-only PROPERTIES FOLDER "MLIR/Tests")
 
 add_lit_testsuite(check-mlir "Running the MLIR regression tests"
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${MLIR_TEST_EXCLUDE_FROM_CHECK_ALL}
   DEPENDS ${MLIR_TEST_DEPENDS}
   )
 

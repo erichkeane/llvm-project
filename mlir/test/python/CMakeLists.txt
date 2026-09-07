@@ -17,5 +17,6 @@ if(NOT MLIR_STANDALONE_BUILD)
 endif()
 add_lit_testsuite(check-mlir-python "Running the MLIR Python regression tests"
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${MLIR_TEST_EXCLUDE_FROM_CHECK_ALL}
   DEPENDS ${MLIR_PYTHON_TEST_DEPENDS}
 )
